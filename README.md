@@ -1,7 +1,3 @@
-Of course! Here's a `README.md` for your GitHub repository that pertains to the script you've been working on:
-
----
-
 # WordPress Media Checker
 
 A Python script to automatically scan WordPress articles and identify missing PDF links.
