@@ -12,7 +12,7 @@ parser.add_argument("--base-url", default="https://ives-openscience.eu/", help="
 parser.add_argument("--start", type=int, default=1, help="Starting article number.")
 parser.add_argument("--end", type=int, default=40197, help="Ending article number.")
 parser.add_argument("--output-file", default="missing_media.csv", help="Output CSV file.")
-parser.add_argument("--id-url", default="target-pdf-id", help="ID of the target URL to check.")
+parser.add_argument("--id-url", default="publication-pdf", help="ID of the target URL to check.")
 
 args = parser.parse_args()
 
