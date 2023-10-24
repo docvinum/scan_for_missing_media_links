@@ -3,13 +3,13 @@ from bs4 import BeautifulSoup
 import csv
 import time
 
-BASE_URL = "https://site.com/"
+BASE_URL = "https://example-website.com/"
 START = 1
 END = 100000
 OUTPUT_FILE = "missing_media.csv"
 
 def get_pdf_link_from_article(article_id):
-    """Récupère le lien du PDF d'un article."""
+    """Retrieve the PDF link from an article."""
     url = BASE_URL + str(article_id) + "/"
     response = requests.get(url)
     if response.status_code != 200:
@@ -17,11 +17,11 @@ def get_pdf_link_from_article(article_id):
         return None
 
     soup = BeautifulSoup(response.content, "html.parser")
-    link_element = soup.find('a', id="publication-pdf")
+    link_element = soup.find('a', id="target-pdf-id")
     return link_element['href'] if link_element else None
 
 def check_link(link):
-    """Vérifie si un lien pointe vers un média manquant."""
+    """Check if a link points to a missing media."""
     response = requests.head(link, allow_redirects=True)
     return response.status_code == 404
 
@@ -39,7 +39,7 @@ def main():
                 writer.writerow([pdf_link, article_url])
                 print(f"Missing media: {pdf_link} in article {article_url}")
 
-            time.sleep(0.5)  # Ajoute un délai de 0,5 secondes entre chaque requête
+            time.sleep(0.5)  # Add a delay of 0.5 seconds between each request
 
 if __name__ == "__main__":
     main()
