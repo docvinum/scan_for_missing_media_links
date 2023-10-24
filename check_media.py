@@ -16,7 +16,8 @@ def get_pdf_link_from_article(article_id):
         print(f"Error fetching {url}: {response.status_code}")
         return None
 
-    soup = BeautifulSoup(response.content, "html.parser")
+    content = response.content.decode('utf-8', 'replace')
+    soup = BeautifulSoup(content, "html.parser")
     link_element = soup.find('a', id="target-pdf-id")
     return link_element['href'] if link_element else None
 
