@@ -1,13 +1,26 @@
+
+import argparse
 import asyncio
 import aiohttp
 from bs4 import BeautifulSoup
 import csv
 from multiprocessing import Pool, cpu_count
 
-BASE_URL = "https://example-website.com/"
-START = 1
-END = 100000
-OUTPUT_FILE = "missing_media.csv"
+# Définition des arguments et valeurs par défaut
+parser = argparse.ArgumentParser(description="Scan articles for missing media links.")
+parser.add_argument("--base-url", default="https://ives-openscience.eu/", help="Base URL of the articles.")
+parser.add_argument("--start", type=int, default=1, help="Starting article number.")
+parser.add_argument("--end", type=int, default=40197, help="Ending article number.")
+parser.add_argument("--output-file", default="missing_media.csv", help="Output CSV file.")
+parser.add_argument("--id-url", default="target-pdf-id", help="ID of the target URL to check.")
+
+args = parser.parse_args()
+
+BASE_URL = args.base_url
+START = args.start
+END = args.end
+OUTPUT_FILE = args.output_file
+ID_URL = args.id_url
 CHUNK_SIZE = (END - START + 1) // cpu_count()
 
 async def fetch(session, url):
