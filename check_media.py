@@ -25,21 +25,28 @@ def check_link(link):
     response = requests.head(link, allow_redirects=True)
     return response.status_code == 404
 
+def write_to_csv(missing_link, article_link):
+    """Write the missing link and article link to the CSV file."""
+    with open(OUTPUT_FILE, "a", newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow([missing_link, article_link])
+
 def main():
-    with open(OUTPUT_FILE, "w") as csvfile:
+    # Write the header row to the CSV file at the beginning
+    with open(OUTPUT_FILE, "w", newline='') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(["Missing Media URL", "Article URL"])
 
-        for article_id in range(START, END + 1):
-            print(f"Checking article {article_id}")
-            article_url = BASE_URL + str(article_id) + "/"
-            pdf_link = get_pdf_link_from_article(article_id)
+    for article_id in range(START, END + 1):
+        print(f"Checking article {article_id}")
+        article_url = BASE_URL + str(article_id) + "/"
+        pdf_link = get_pdf_link_from_article(article_id)
 
-            if pdf_link and check_link(pdf_link):
-                writer.writerow([pdf_link, article_url])
-                print(f"Missing media: {pdf_link} in article {article_url}")
+        if pdf_link and check_link(pdf_link):
+            print(f"Missing media: {pdf_link} in article {article_url}")
+            write_to_csv(pdf_link, article_url)
 
-            time.sleep(0.5)  # Add a delay of 0.5 seconds between each request
+        time.sleep(0.5)  # Add a delay of 0.5 seconds between each request
 
 if __name__ == "__main__":
     main()
