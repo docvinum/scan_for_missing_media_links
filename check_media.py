@@ -1,53 +1,53 @@
-import requests
+import asyncio
+import aiohttp
 from bs4 import BeautifulSoup
 import csv
-import time
+from multiprocessing import Pool, cpu_count
 
 BASE_URL = "https://example-website.com/"
 START = 1
 END = 100000
 OUTPUT_FILE = "missing_media.csv"
+CHUNK_SIZE = (END - START + 1) // cpu_count()
 
-def get_pdf_link_from_article(article_id):
-    """Retrieve the PDF link from an article."""
-    url = BASE_URL + str(article_id) + "/"
-    response = requests.get(url)
-    if response.status_code != 200:
-        print(f"Error fetching {url}: {response.status_code}")
-        return None
+async def fetch(session, url):
+    print(f"Fetching {url}")  # Log
+    async with session.get(url) as response:
+        return await response.text()
 
-    content = response.content.decode('utf-8', 'replace')
-    soup = BeautifulSoup(content, "html.parser")
-    link_element = soup.find('a', id="target-pdf-id")
-    return link_element['href'] if link_element else None
+async def check_link(session, url):
+    print(f"Checking link {url}")  # Log
+    async with session.head(url) as response:
+        return response.status == 404
 
-def check_link(link):
-    """Check if a link points to a missing media."""
-    response = requests.head(link, allow_redirects=True)
-    return response.status_code == 404
+async def process_chunk(start, end):
+    async with aiohttp.ClientSession() as session:
+        for article_id in range(start, end + 1):
+            article_url = BASE_URL + str(article_id) + "/"
+            html_content = await fetch(session, article_url)
+            soup = BeautifulSoup(html_content, "html.parser")
+            link_element = soup.find('a', id="target-pdf-id")
+            pdf_link = link_element['href'] if link_element else None
+            if pdf_link and await check_link(session, pdf_link):
+                print(f"Found missing media at {article_url}")  # Log
+                with open(OUTPUT_FILE, "a", newline='') as csvfile:
+                    writer = csv.writer(csvfile)
+                    writer.writerow([pdf_link, article_url])
 
-def write_to_csv(missing_link, article_link):
-    """Write the missing link and article link to the CSV file."""
-    with open(OUTPUT_FILE, "a", newline='') as csvfile:
-        writer = csv.writer(csvfile)
-        writer.writerow([missing_link, article_link])
+def worker(start):
+    print(f"Starting worker for range {start} to {start + CHUNK_SIZE}")  # Log
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(process_chunk(start, start + CHUNK_SIZE))
+    loop.close()
 
-def main():
-    # Write the header row to the CSV file at the beginning
+if __name__ == "__main__":
+    # Write header to the CSV file
     with open(OUTPUT_FILE, "w", newline='') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(["Missing Media URL", "Article URL"])
 
-    for article_id in range(START, END + 1):
-        print(f"Checking article {article_id}")
-        article_url = BASE_URL + str(article_id) + "/"
-        pdf_link = get_pdf_link_from_article(article_id)
-
-        if pdf_link and check_link(pdf_link):
-            print(f"Missing media: {pdf_link} in article {article_url}")
-            write_to_csv(pdf_link, article_url)
-
-        time.sleep(0.5)  # Add a delay of 0.5 seconds between each request
-
-if __name__ == "__main__":
-    main()
+    # Split the work among processes
+    print(f"Starting multiprocessing with chunk size {CHUNK_SIZE}")  # Log
+    with Pool() as pool:
+        pool.map(worker, range(START, END + 1, CHUNK_SIZE))
