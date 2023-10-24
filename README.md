@@ -1,48 +1,55 @@
-# WordPress Media Checker
-
-A Python script to automatically scan WordPress articles and identify missing PDF links.
+# Media Link Checker with Customizable Parameters
 
 ## Overview
 
-This script is designed to traverse articles on the WordPress site `https://ives-openscience.eu/`, specifically checking articles from `/1/` to `/100000/`. For each article, the script checks for a specific link (with the ID `publication-pdf`) to see if it points to a missing PDF. Any detected missing PDF links, along with the corresponding article links, are logged into a CSV file.
+This Python script scans articles on a website to identify missing media links. It's designed for flexibility, allowing users to customize key parameters through command-line arguments.
 
 ## Prerequisites
 
 - Python 3.x
-- `requests` and `beautifulsoup4` Python packages. These can be installed using pip:
+- Required Python packages: `aiohttp`, `beautifulsoup4`
+
+  Install the necessary packages with:
   ```bash
-  pip3 install requests beautifulsoup4
+  pip3 install aiohttp beautifulsoup4
   ```
 
 ## Usage
 
-1. Clone this repository:
+1. **Clone this repository**:
    ```bash
-   git clone [YOUR REPOSITORY LINK]
-   cd [YOUR REPOSITORY NAME]
+   git clone https://github.com/docvinum/wp-check-media/
+   cd wp-check-media
    ```
 
-2. Run the script:
+2. **Run the script with default settings**:
    ```bash
    python3 check_media.py
    ```
 
-3. Once the script completes its execution, check the `missing_media.csv` file for results.
+3. **Run the script with custom settings**:
+   ```bash
+   python3 check_media.py --base-url [YOUR_BASE_URL] --start [STARTING_ARTICLE_NUMBER] --end [ENDING_ARTICLE_NUMBER] --output-file [OUTPUT_FILENAME] --id-url [TARGET_URL_ID]
+   ```
+
+## Command-Line Arguments
+
+- `--base-url`: Specifies the base URL of the articles. (Default: `https://ives-openscience.eu/`)
+- `--start`: Designates the starting article number. (Default: `1`)
+- `--end`: Defines the ending article number. (Default: `40197`)
+- `--output-file`: Names the output CSV file. (Default: `missing_media.csv`)
+- `--id-url`: Provides the ID of the target URL to check within each article. (Default: `target-pdf-id`)
 
 ## Features
 
-- Automatically scans through specified range of articles.
-- Identifies and logs missing PDF links and corresponding article links.
-- Implements delay between requests to avoid server overload.
+- Scans a designated range of articles to identify missing media links.
+- Supports customization of key parameters through command-line arguments.
+- Uses multiprocessing and asynchronous programming to enhance performance.
 
 ## Contributing
 
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+Contributions via pull requests are welcome. For major changes, please open an issue first to discuss the desired changes.
 
 ## License
 
-[MIT](https://choosealicense.com/licenses/mit/)
-
----
-
-**Note:** This README is a template and might need adjustments based on your actual repository setup, additional features, or any other specific details you might want to include. Also, make sure to replace `[YOUR REPOSITORY LINK]` and `[YOUR REPOSITORY NAME]` with your actual GitHub repository link and name, respectively.
+Released under the [MIT License](https://choosealicense.com/licenses/mit/).
